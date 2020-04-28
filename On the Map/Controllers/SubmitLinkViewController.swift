@@ -20,53 +20,56 @@ class SubmitLinkViewController: UIViewController,UITextFieldDelegate {
         @IBOutlet weak var mapView: MKMapView!
         var locationRetrieved: String!
         var urlRetrieved: String!
-        
+         var selectedTextField: UITextField?
         var location: String = ""
         var coordinate: CLLocationCoordinate2D?
         
         var latitude: Double = 0.0
         var longitude: Double = 0.0
-        
-        var student: StudentInformation?
+         var objectIdHolder: String = ""
+    var student: StudentInformation?
         
         override func viewDidLoad() {
             super.viewDidLoad()
+             urlTextField.delegate = self
+             urlTextField.attributedPlaceholder = NSAttributedString(string: "Enter A Link To Share", attributes: [NSAttributedString.Key.foregroundColor : UIColor.white])
             SubmitLocationButton.layer.cornerRadius = 5
             print(locationRetrieved!)
             search()
+            self.navigationController?.setNavigationBarHidden(true, animated: true)
         }
         
         override func viewWillAppear(_ animated: Bool) {
             self.navigationController?.setNavigationBarHidden(true, animated: true)
             self.tabBarController?.tabBar.isHidden = true
+            subscribeToKeyboardNotifications()
         }
         
         override func viewWillDisappear(_ animated: Bool) {
             self.navigationController?.setNavigationBarHidden(false, animated: true)
             self.tabBarController?.tabBar.isHidden = false
+            unsubscribeFromKeyBoardNotifications()
         }
         
         func search() {
             
-            guard let location = locationRetrieved else {
-                print("no location")
-                let alert = UIAlertController(title: "No Location", message: "Location was not found or entered. Go back to the previous view.", preferredStyle: .alert)
-                alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-                self.present(alert, animated: true, completion: nil)
+            guard let location = locationRetrieved else { //checks if the location was retrieved
+                self.errorAlert("No Location", "Location was not found or entered. Go back to the previous view.")
                 return
             }
             
+            let ai = self.startAnActivityIndicator()
+            
             CLGeocoder().geocodeAddressString(location) { (placemark, error) in
                 
+                ai.stopAnimating()
+                
                 guard error == nil else {
-                    print("Could not find your location")
-                    let alert = UIAlertController(title: "No Location", message: "Location was not found or entered. Go back to the previous view.", preferredStyle: .alert)
-                    alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-                    self.present(alert, animated: true, completion: nil)
+                    self.errorAlert("No Location", "Location was not found or entered. Go back to the previous view.")
                     return
                 }
                 
-                self.location = location
+                self.location = location //assign the location to the global location variable so we can access it
                 self.coordinate = placemark!.first!.location!.coordinate
                 self.pin(coordinate: self.coordinate!)
                 self.latitude = (placemark?.first?.location?.coordinate.latitude)!
@@ -74,8 +77,16 @@ class SubmitLinkViewController: UIViewController,UITextFieldDelegate {
             }
         }
         
+        
         func getUserinfo() {
             UdacityClient.getUser() { (success, error) in
+                
+                if error != nil {
+                    DispatchQueue.main.async {
+                        self.errorAlert("Error", "Error Getting User Info")
+                    }
+                }
+                
                 if success {
                     print("success")
                     
@@ -100,8 +111,7 @@ class SubmitLinkViewController: UIViewController,UITextFieldDelegate {
                     
                 } else {
                     DispatchQueue.main.async {
-                        let alert = UIAlertController(title: "Error", message: "Error Getting User Info", preferredStyle: .alert)
-                        self.present(alert, animated: true, completion: nil)
+                         self.errorAlert("Error", "Error Getting User Info")
                     }
                 }
             }
@@ -111,10 +121,10 @@ class SubmitLinkViewController: UIViewController,UITextFieldDelegate {
             UdacityClient.updateUserLocation(student: student!) { (success, error) in
                 if error != nil {
                     print(error?.localizedDescription ?? "")
-                    let errorAlert = UIAlertController(title: "Could not update student Location", message: "There was an error trying to update a pin", preferredStyle: .alert)
-                    errorAlert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                    self.errorAlert("Could not update student Location", "There was an error trying to update a pin")
                     return
                 }
+                
                 
                 if success {
                     print("update success")
@@ -123,22 +133,18 @@ class SubmitLinkViewController: UIViewController,UITextFieldDelegate {
                     DispatchQueue.main.async {
                         self.navigationController?.popToRootViewController(animated: true)
                     }
-                } else {
-                    let errorAlert = UIAlertController(title: "Could not update student Location", message: "There was an error trying to update a pin", preferredStyle: .alert)
-                    errorAlert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-                    self.present(errorAlert, animated: true)
-                    print("error")
-                }
+                 } else {
+                                   self.errorAlert("Could not update student Location", "There was an error trying to update a pin")
+                               }
             }
         }
         
         func postLocation() {
             UdacityClient.postStudentLocation(student: student!) { (success, error) in
+                
                 if error != nil {
                     print(error?.localizedDescription ?? "")
-                    let errorAlert = UIAlertController(title: "Could not post student location", message: "There was an error trying to post a pin", preferredStyle: .alert)
-                    errorAlert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-                    self.present(errorAlert, animated: true)
+                    self.errorAlert("Could not post student location", "There was an error trying to post a pin")
                     return
                 }
                 
@@ -149,16 +155,16 @@ class SubmitLinkViewController: UIViewController,UITextFieldDelegate {
                     print(self.student?.latitude ?? 0)
                     print(self.student?.longitude ?? 0)
                     DispatchQueue.main.async {
-                        self.navigationController?.popToRootViewController(animated: true)
+                        let vc = self.navigationController?.viewControllers[1]
+                        self.navigationController?.popToViewController(vc!, animated: true)
                     }
                 } else {
-                    let errorAlert = UIAlertController(title: "Could not post student location", message: "There was an error trying to post a pin", preferredStyle: .alert)
-                    errorAlert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-                    self.present(errorAlert, animated: true)
-                    print("error")
+                    self.errorAlert("Could not post student location", "There was an error trying to post a pin")
                 }
             }
         }
+        
+    
         
         func pin(coordinate: CLLocationCoordinate2D) {
             let annotation = MKPointAnnotation()
@@ -173,6 +179,50 @@ class SubmitLinkViewController: UIViewController,UITextFieldDelegate {
                 self.mapView.regionThatFits(region)
             }
         }
+    func getKeyboardHeight(notification: NSNotification) -> CGFloat {
+                  let userInfo = notification.userInfo
+                  let keyboardSize = userInfo![UIResponder.keyboardFrameEndUserInfoKey] as! NSValue
+                  return keyboardSize.cgRectValue.height
+              }
+    func subscribeToKeyboardNotifications() {
+           // keyboardWillShow
+           NotificationCenter.default.addObserver(
+           self,
+           selector: #selector(self.keyboardWillShow(_:)),
+           name: UIResponder.keyboardWillShowNotification, object: nil)
+           // keyboardWillHide
+           NotificationCenter.default.addObserver(
+              self,
+              selector: #selector(self.keyboardWillHide(_:)),
+              name: UIResponder.keyboardWillHideNotification, object: nil)
+         }
+       
+       @objc func keyboardWillShow(_ notification:Notification) {
+           if let text = selectedTextField {
+                      if text == urlTextField {
+                          self.view.frame.origin.y = -getKeyboardHeight(notification: notification as NSNotification)
+           }
+           
+       }
+    }
+             @objc func keyboardWillHide(_ notification:Notification) {
+               if selectedTextField != nil {
+                  if urlTextField.isEditing, view.frame.origin.y != 0 {
+                      view.frame.origin.y = 0
+                 }
+             }
+       }
+    func unsubscribeFromKeyBoardNotifications() {
+            // keyboardWillShow
+            NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
+            // keyboardWillHide
+            NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
+          }
+     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+         
+         textField.resignFirstResponder()
+         return true
+     }
         
         @IBAction func cancelButtonTapped(_ sender: Any) {
             self.navigationController?.popViewController(animated: true)
@@ -182,4 +232,23 @@ class SubmitLinkViewController: UIViewController,UITextFieldDelegate {
             urlRetrieved = urlTextField.text
             getUserinfo()
         }
+    func errorAlert(_ title: String?, _ message: String?) {
+            let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+            let actionOK = UIAlertAction(title: "OK", style: .default, handler: nil)
+            alert.addAction(actionOK)
+            self.present(alert, animated: true, completion: nil)
+        }
+}
+    extension SubmitLinkViewController {
+        func startAnActivityIndicator() -> UIActivityIndicatorView {
+            let ai = UIActivityIndicatorView(style: .large)
+            self.view.addSubview(ai)
+            self.view.bringSubviewToFront(ai)
+            ai.center = self.view.center
+            ai.hidesWhenStopped = true
+            ai.startAnimating()
+            return ai
+        }
     }
+    
+    

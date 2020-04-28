@@ -13,13 +13,18 @@ class AddNewLocationForMapViewController: UIViewController,UITextFieldDelegate {
     @IBOutlet weak var locationinputTextfield: UITextField!{ didSet {
        locationinputTextfield.becomeFirstResponder()
          locationinputTextfield.delegate = self
+        
+
         }
     }
         @IBOutlet weak var FindOnTheMapButton: UIButton!
+    
        var selectedTextField: UITextField?
+    
         override func viewDidLoad() {
             super.viewDidLoad()
             FindOnTheMapButton.layer.cornerRadius = 5
+            locationinputTextfield.attributedPlaceholder = NSAttributedString(string: "Enter Your Location Here", attributes: [NSAttributedString.Key.foregroundColor : UIColor.white])
         }
         
         override func viewWillAppear(_ animated: Bool) {

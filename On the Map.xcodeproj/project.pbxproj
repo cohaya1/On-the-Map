@@ -12,6 +12,7 @@
 		1D2520742447F67E00484246 /* AddNewLocationForMapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D2520732447F67E00484246 /* AddNewLocationForMapViewController.swift */; };
 		1D2520762447FA4E00484246 /* SubmitLinkViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D2520752447FA4E00484246 /* SubmitLinkViewController.swift */; };
 		1D2520782448CE8100484246 /* TabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D2520772448CE8100484246 /* TabBarController.swift */; };
+		1D66D2FB24524CFE00E83A97 /* ActivityIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D66D2FA24524CFE00E83A97 /* ActivityIndicator.swift */; };
 		1D894F3424410C0500EA14DE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D894F3324410C0500EA14DE /* AppDelegate.swift */; };
 		1D894F3624410C0500EA14DE /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D894F3524410C0500EA14DE /* SceneDelegate.swift */; };
 		1D894F3824410C0500EA14DE /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D894F3724410C0500EA14DE /* MapViewController.swift */; };
@@ -50,6 +51,7 @@
 		1D2520732447F67E00484246 /* AddNewLocationForMapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddNewLocationForMapViewController.swift; sourceTree = "<group>"; };
 		1D2520752447FA4E00484246 /* SubmitLinkViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubmitLinkViewController.swift; sourceTree = "<group>"; };
 		1D2520772448CE8100484246 /* TabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarController.swift; sourceTree = "<group>"; };
+		1D66D2FA24524CFE00E83A97 /* ActivityIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityIndicator.swift; sourceTree = "<group>"; };
 		1D894F3024410C0500EA14DE /* On the Map.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "On the Map.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1D894F3324410C0500EA14DE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		1D894F3524410C0500EA14DE /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -105,6 +107,7 @@
 				1D2520732447F67E00484246 /* AddNewLocationForMapViewController.swift */,
 				1D2520752447FA4E00484246 /* SubmitLinkViewController.swift */,
 				1D2520772448CE8100484246 /* TabBarController.swift */,
+				1D66D2FA24524CFE00E83A97 /* ActivityIndicator.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -325,6 +328,7 @@
 				1D894F3824410C0500EA14DE /* MapViewController.swift in Sources */,
 				1D894F6A2443E41400EA14DE /* StudentListsTableViewController.swift in Sources */,
 				1D894F662442725600EA14DE /* LocationsAPI.swift in Sources */,
+				1D66D2FB24524CFE00E83A97 /* ActivityIndicator.swift in Sources */,
 				1D894F3424410C0500EA14DE /* AppDelegate.swift in Sources */,
 				1D894F6E24453B6900EA14DE /* LoginViewController.swift in Sources */,
 				1D2520762447FA4E00484246 /* SubmitLinkViewController.swift in Sources */,

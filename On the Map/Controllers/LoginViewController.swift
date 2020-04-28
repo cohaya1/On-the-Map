@@ -70,39 +70,37 @@ class LoginViewController: UIViewController,UITextFieldDelegate {
             fieldsChecker()
             UdacityClient.login(self.emailTextField.text!, self.passwordTextField.text!) { (successful, error) in
                 
-                if error != nil {
+               if error != nil {
                     DispatchQueue.main.async {
-                        let errorLoginAlert = UIAlertController(title: "Network Error", message: "Could not connect to the network", preferredStyle: .alert)
-                        errorLoginAlert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-                        self.present(errorLoginAlert, animated: true, completion: nil)
+                        self.errorAlert("Invalid Access", error?.localizedDescription)
                         self.setLoggingIn(false)
                     }
                 }
-                
+                           
                 if successful {
-                    print("success")
-                    DispatchQueue.main.async {
-                        let mapVC = self.storyboard?.instantiateViewController(identifier: "TabBarController") as! UITabBarController
-                        self.navigationController?.pushViewController(mapVC, animated: true)
-                        self.setLoggingIn(false)
-                    }
-                } else {
-                    DispatchQueue.main.async {
-                        let invalidLogin = UIAlertController(title: "Invalid Access", message: "Invalid Email or Password", preferredStyle: .alert)
-                        invalidLogin.addAction(UIAlertAction(title: "OK", style: .default, handler: {_ in
-                            return
-                        }))
-                        self.present(invalidLogin, animated: true, completion: nil)
-                        self.setLoggingIn(false)
-                    }
-                }
-            }
-        }
+                               print("success")
+                               DispatchQueue.main.async {
+                                   self.performSegue(withIdentifier: "ShowMap", sender: sender)
+                                   self.setLoggingIn(false)
+                               }
+                           } else {
+                               DispatchQueue.main.async {
+                                   self.errorAlert("Invalid Access", "Invalid Email or Password")
+                                   self.setLoggingIn(false)
+                                
+                               }
+                           }
+                       }
+                   }
+    
+   
         
         @IBAction func signUpTapped(_ sender: Any) {
             let url = UdacityClient.Endpoints.signUp.url
             UIApplication.shared.open(url, options: [:], completionHandler: nil)
         }
+   
+    
         func getKeyboardHeight(notification: NSNotification) -> CGFloat {
                   let userInfo = notification.userInfo
                   let keyboardSize = userInfo![UIResponder.keyboardFrameEndUserInfoKey] as! NSValue
@@ -146,31 +144,34 @@ class LoginViewController: UIViewController,UITextFieldDelegate {
           }
         
         private func fieldsChecker(){
-            if (emailTextField.text?.isEmpty)! || (passwordTextField.text?.isEmpty)!  {
-                DispatchQueue.main.async {
-                    let alert = UIAlertController(title: "Credentials were not filled in", message: "Please fill both email and password", preferredStyle: .alert)
-                    alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-                    self.present(alert, animated: true, completion: nil)
-                }
-            } else {
-                DispatchQueue.main.async {
-                    self.setLoggingIn(true)
-                }
-            }
-        }
+             if (emailTextField.text?.isEmpty)! || (passwordTextField.text?.isEmpty)!  {
+                       DispatchQueue.main.async {
+                           self.errorAlert("Credentials were not filled in", "Please fill both email and password")
+                       }
+                   } else {
+                       DispatchQueue.main.async {
+                           self.setLoggingIn(true)
+                       }
+                   }
+               }
         
-        func setLoggingIn(_ loggingIn: Bool) { //function handles all of the UI Elements states
+       
+        func setLoggingIn(_ loggingIn: Bool) {
             if loggingIn {
                 activityIndicator.isHidden = false
                 activityIndicator.startAnimating()
                 print("loggin in")
             } else {
                 activityIndicator.stopAnimating()
-                activityIndicator.isHidden = true
             }
             emailTextField.isEnabled = !loggingIn
             passwordTextField.isEnabled = !loggingIn
             loginButton.isEnabled = !loggingIn
-            
         }
+    func errorAlert(_ title: String?, _ message: String?) {
+               let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+               let actionOK = UIAlertAction(title: "OK", style: .default, handler: nil)
+               alert.addAction(actionOK)
+               self.present(alert, animated: true, completion: nil)
+           }
     }

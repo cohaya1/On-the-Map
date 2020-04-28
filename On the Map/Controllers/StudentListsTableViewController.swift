@@ -12,7 +12,9 @@ class StudentListsTableViewController:UITableViewController {
 
    var result = [StudentLocation]()
         @IBOutlet var listTableView: UITableView!
-        
+   
+    
+    
         override func viewDidLoad() {
             super.viewDidLoad()
             result = StudentLocations.lastFetched ?? []
@@ -22,53 +24,48 @@ class StudentListsTableViewController:UITableViewController {
             tableView.reloadData()
         }
 
-        @IBAction func addPinButtonTapped(_ sender: Any) {
-            let locationVC = storyboard?.instantiateViewController(identifier: " AddNewLocationForMapViewController") as!  AddNewLocationForMapViewController
-           self.present(locationVC, animated: true, completion: nil)
-       }
+       
         
-        @IBAction func refreshButtonTapped(_ sender: Any) {
-            loadStudentLocations()
-            tableView.reloadData()
-        }
+        
         
         func loadStudentLocations() {
             UdacityClient.getStudentLocations { (result, error) in
                 
-                if error != nil {
-                    print(error?.localizedDescription ?? "")
-                    let errorAlert = UIAlertController(title: "Could not load student data", message: "There was an error in trying to retrieve other students data", preferredStyle: .alert)
-                    errorAlert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-                    self.present(errorAlert, animated: true)
+               if error != nil {
+                            print(error?.localizedDescription ?? "")
+                            self.errorAlert("Could not load student data", "There was an error in trying to retrieve other students data", "OK", .default)
+                        }
+                        
+                        guard result != nil else {
+                            self.errorAlert("Could not load student data", "There was an error in trying to retrieve other students data", "OK", .default)
+                            return
+                        }
+                        
+                        StudentLocations.lastFetched = result!
+                        var mapPin = [MKPointAnnotation]()
+                        
+                        for location in result! {
+                            let longitude = CLLocationDegrees(location.longitude!)
+                            let latitude = CLLocationDegrees(location.latitude!)
+                            let coordinates = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+                            let mediaURL = location.mediaURL
+                            let firstName = location.firstName
+                            let lastName = location.lastName
+                            
+                            let annotation = MKPointAnnotation()
+                            annotation.coordinate = coordinates
+                            annotation.title = "\(String(describing: firstName)) \(String(describing: lastName))"
+                            annotation.subtitle = mediaURL
+                            mapPin.append(annotation)
+                        }
+                    }
                 }
-                
-                guard result != nil else {
-                    let errorAlert = UIAlertController(title: "Could not load student data", message: "There was an error in trying to retrieve other students data", preferredStyle: .alert)
-                    errorAlert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-                    self.present(errorAlert, animated: true)
-                    return
-                }
-                
-                StudentLocations.lastFetched = result
-                var mapPin = [MKPointAnnotation]()
-                
-                for location in result! {
-                    let longitude = CLLocationDegrees(location.longitude!)
-                    let latitude = CLLocationDegrees(location.latitude!)
-                    let coordinates = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
-                    let mediaURL = location.mediaURL
-                    let firstName = location.firstName
-                    let lastName = location.lastName
-                    
-                    let annotation = MKPointAnnotation()
-                    annotation.coordinate = coordinates
-                    annotation.title = "\(String(describing: firstName)) \(String(describing: lastName))"
-                    annotation.subtitle = mediaURL
-                    mapPin.append(annotation)
-                }
-            }
-        }
-        
+    func errorAlert(_ title: String?, _ message: String?, _ action: String?, _ style: UIAlertAction.Style) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let action = UIAlertAction(title: action, style: style, handler: nil)
+        alert.addAction(action)
+        self.present(alert, animated: true, completion: nil)
+    }
         override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
             return result.count
         }

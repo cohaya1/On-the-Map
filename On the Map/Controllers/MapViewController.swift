@@ -11,9 +11,9 @@ import MapKit
 import SafariServices
 
 class MapViewController: UIViewController {
-     @IBOutlet weak var addPinButton: UIBarButtonItem!
+   
       @IBOutlet weak var mapView: MKMapView!
-        @IBOutlet weak var refreshButton: UIBarButtonItem!
+        
      //   @IBOutlet weak var onTheMapNavItem: UINavigationItem!
         override func viewDidLoad() {
                 super.viewDidLoad()
@@ -27,93 +27,65 @@ class MapViewController: UIViewController {
             }
             
             func loadStudentLocations() {
-                UdacityClient.getStudentLocations { (result, error) in
-                    
-                    if error != nil {
-                        print(error?.localizedDescription ?? "")
-                        let errorAlert = UIAlertController(title: "Could not load student data", message: "There was an error in trying to retrieve other students data", preferredStyle: .alert)
-                        errorAlert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-                        self.present(errorAlert, animated: true)
-                    }
-                    
-                    guard result != nil else {
-                        let errorAlert = UIAlertController(title: "Could not load student data", message: "There was an error in trying to retrieve other students data", preferredStyle: .alert)
-                        errorAlert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-                        self.present(errorAlert, animated: true)
-                        return
-                    }
-                    
-                    StudentLocations.lastFetched = result
-                    var mapPin = [MKPointAnnotation]()
-                    
-                    for location in result! {
-                        let longitude = CLLocationDegrees(location.longitude!)
-                        let latitude = CLLocationDegrees(location.latitude!)
-                        let coordinates = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
-                        let mediaURL = location.mediaURL
-                        let firstName = location.firstName
-                        let lastName = location.lastName
+                    mapView.removeAnnotations(mapView.annotations) //remove pins so we can reupdate them
+                    UdacityClient.getStudentLocations { (result, error) in
                         
-                        let annotation = MKPointAnnotation()
-                        annotation.coordinate = coordinates
-                        annotation.title = "\(firstName) \(lastName)"
-                        annotation.subtitle = mediaURL
-                        mapPin.append(annotation)
+                        if error != nil {
+                            print(error?.localizedDescription ?? "")
+                            DispatchQueue.main.async {
+                                self.errorAlert("Could not load student data", "There was an error in trying to retrieve other students data", "OK", .default)
+                            }
+                        }
                         
-                    }
-                    DispatchQueue.main.async {
-                        self.mapView.addAnnotations(mapPin)
+                        guard result != nil else {
+                            DispatchQueue.main.async {
+                                self.errorAlert("Could not load student data", "There was an error in trying to retrieve other students data", "OK", .default)
+                            }
+                            return
+                        }
+                        
+                        StudentLocations.lastFetched = result!
+                        var mapPin = [MKPointAnnotation]()
+                        
+                        for location in result! {
+                            let longitude = CLLocationDegrees(location.longitude!)
+                            let latitude = CLLocationDegrees(location.latitude!)
+                            let coordinates = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+                            let mediaURL = location.mediaURL
+                            let firstName = location.firstName
+                            let lastName = location.lastName
+                            
+                            let annotation = MKPointAnnotation()
+                            annotation.coordinate = coordinates
+                            annotation.title = "\(firstName) \(lastName)"
+                            annotation.subtitle = mediaURL
+                            mapPin.append(annotation)
+                            
+                        }
+                        DispatchQueue.main.async {
+                            self.mapView.addAnnotations(mapPin)
+                        }
                     }
                 }
-            }
-            
-            @IBAction func refreshButtonTappedforMap(_ sender: Any) {
-                loadStudentLocations()
-            }
-            
-            @IBAction func addPinButtonTapped(_ sender: Any) {
-                if UdacityClient.createdAt == "" {
-                    let locationVC = self.storyboard?.instantiateViewController(identifier: "AddNewLocationForMapViewController") as! AddNewLocationForMapViewController
-                    self.navigationController?.pushViewController(locationVC, animated: true)
-                } else {
-                    let alert = UIAlertController(title: "Overwrite Location?", message: "Would you like to overwrite your pin's location?", preferredStyle: .alert)
-                    let actionContinue = UIAlertAction(title: "Continue", style: .default) { (action) in
-                        let locationVC = self.storyboard?.instantiateViewController(identifier: "AddNewLocationForMapViewController") as! AddNewLocationForMapViewController
-                        self.navigationController?.pushViewController(locationVC, animated: true)
-                    }
-                    let actionCancel = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
-                    alert.addAction(actionContinue)
-                    alert.addAction(actionCancel)
+
+                //MARK: ERROR ALERT FUNCTION
+                
+                func errorAlert(_ title: String?, _ message: String?, _ action: String?, _ style: UIAlertAction.Style) {
+                    let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+                    let action = UIAlertAction(title: action, style: style, handler: nil)
+                    alert.addAction(action)
                     self.present(alert, animated: true, completion: nil)
                 }
+                
             }
+                  
+    
+         
+
+           
  
          
-            @IBAction func logoutButtonTapped(_ sender: Any) {
-                UdacityClient.logout { (success, error) in
-                    
-                    if error != nil {
-                        let alert = UIAlertController(title: "Could not log out", message: "Error logging out.", preferredStyle: .alert)
-                        alert.addAction(UIAlertAction(title: "Dismiss", style: .cancel, handler: nil))
-                        self.present(alert, animated: true, completion: nil)
-                    }
-                    
-                    if success {
-                        print("logged out")
-                        DispatchQueue.main.async {
-                //           let lvc = self.storyboard?.instantiateViewController(withIdentifier: "LoginViewController") as? LoginViewController
-               //             self.navigationController?.pushViewController(lvc!, animated: true)
-                        }
-                    } else {
-                        DispatchQueue.main.async {
-                            let alert = UIAlertController(title: "Could not log out", message: "Error logging out.", preferredStyle: .alert)
-                            alert.addAction(UIAlertAction(title: "Dismiss", style: .cancel, handler: nil))
-                            self.present(alert, animated: true, completion: nil)
-                        }
-                    }
-                }
-            }
-        }
+            
 
         extension MapViewController: MKMapViewDelegate {
             func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
@@ -150,3 +122,4 @@ class MapViewController: UIViewController {
                 }
             }
         }
+
