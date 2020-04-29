@@ -72,6 +72,7 @@ class UdacityClient {
         let task = session.dataTask(with: request) { data, response, error in
             if error != nil {
                 print(error?.localizedDescription ?? "")
+                completion(false, error)
                 return
             }
             
