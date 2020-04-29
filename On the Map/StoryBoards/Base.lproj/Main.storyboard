@@ -189,7 +189,6 @@
                                         </state>
                                         <connections>
                                             <action selector="loginTapped:" destination="Z7y-GE-T00" eventType="primaryActionTriggered" id="zru-ds-XyN"/>
-                                            <segue destination="ARv-lw-ycw" kind="show" identifier="ShowMap" id="soK-iE-ecL"/>
                                         </connections>
                                     </button>
                                     <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="medium" translatesAutoresizingMaskIntoConstraints="NO" id="tpp-r0-vtR">
@@ -270,6 +269,7 @@
                         <outlet property="myView" destination="bfp-Gh-N2E" id="R0h-Aq-gsa"/>
                         <outlet property="passwordTextField" destination="BJ3-Kj-y0u" id="tud-4q-Lyn"/>
                         <outlet property="signUPButton" destination="KJs-gm-TxK" id="vmi-V1-Q3Y"/>
+                        <segue destination="ARv-lw-ycw" kind="show" identifier="ShowMap" id="mIV-vQ-rh3"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="oO3-89-aUx" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
